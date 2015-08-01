@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1>Add Team</h1>
+<div class="row">
+	<form action="/team/add" method="POST" class="col s12">
+		<div class="row">
+			<div class="input-field col s12">
+				<input type="text" name="username">
+				<label for="username">Username</label>
+			</div>
+			<div class="input-field col s12">
+				<input type="text" name="firstname">
+				<label for="firstname">First Name</label>
+			</div>
+			<div class="input-field col s12">
+				<input type="text" name="lastname">
+				<label for="lastname">Last Name</label>
+			</div>
+			<div class="col s12">
+				<label>Role</label>
+				<select name="role" class="browser-default">
+					<option value="Leader">Leader</option>
+					<option value="Programmer">Programmer</option>
+					<option value="Designer">Designer</option>
+				</select>
+			</div>
+			<div class="input-field col s12">
+				<button class="btn waves-effect waves-light" type="submit" name="action">Add
+					<i class="material-icons">send</i>
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+<h1>List Item</h1>
+
+{% if teams %}
+<table class="responsive-table">
+	<thead>
+		<tr>
+			<th data-field="id">Id</th>
+			<th data-field="username">Username</th>
+			<th data-field="fullname">Full Name</th>
+			<th data-field="role">Role</th>
+		</tr>
+	</thead>
+{% for team in teams %}
+	<tbody>
+		<tr>
+			<td>{{ team.id }}</td>
+			<td>{{ team.username }}</td>
+			<td>{{ team.firstname }} {{ team.lastname }}</td>
+			<td>{{ team.role }}</td>
+		</tr>
+	</tbody>
+{% endfor %}
+</table>
+{% else %}
+<div class="card-panel">
+	<span class="red-text text-darken-2">Teams are empty</span>
+</div>
+{% endif %}
+{% endblock %}
