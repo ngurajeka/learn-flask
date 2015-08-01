@@ -1,4 +1,4 @@
-# Learn Flask the Python Web Framework
+# Learn Flask, a Python MicroFramework
 
 ## How to start
 - Clone this repo (or fork)
@@ -19,4 +19,5 @@ python app.py
 ```
 - Open the web browser and go to http://0.0.0.0:8000 or http://localhost:8000
 - Open http://flask.pocoo.org/docs to see the full documentation
+
 ## Happy Hacking
