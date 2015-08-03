@@ -1,62 +1,60 @@
 import os
 from sqlite3 import dbapi2 as sqlite
 from flask import Flask, g, make_response, redirect, render_template, request, url_for
+from flask.ext.sqlalchemy import SQLAlchemy
 from contextlib import closing
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__name__))
 
-# apps configuration
-DATABASE = os.path.join(PROJECT_DIR, 'app.db')
-DEBUG = True
-SECRET_KEY='skfjsdalfjadskfl;afka;fdasfdsjafls'
-USERNAME='admin'
-PASSWORD='test123'
-
 app = Flask(__name__)
-app.config.from_object(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(PROJECT_DIR, 'apps.db')
 
-# connecting to database
-def connect_db():
-	return sqlite.connect(app.config['DATABASE'])
+db = SQLAlchemy(app)
 
-def init_db():
-	with closing(connect_db()) as db:
-		with app.open_resource('apps_schema.sql', mode='r') as file:
-			db.cursor().executescript(file.read())
-		db.commit()
+class Team(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(32), unique=True)
+    email = db.Column(db.String(50), unique=True)
+    firstname = db.Column(db.String(32))
+    lastname = db.Column(db.String(32))
+    role = db.Column(db.String(15))
 
-@app.before_request
-def before_request():
-	g.db = connect_db()
+    def __init__(self, username, email, firstname, lastname, role):
+        self.username = username
+        self.email = email
+        self.firstname = firstname
+        self.lastname = lastname
+        self.role = role
 
-@app.teardown_request
-def teardown_request(exception):
-	db = getattr(g, 'db', None)
-	if db is not None:
-		db.close()
+    def __repr__(self):
+        return '<User %r>' % self.username
 
 @app.route("/")
 def index():
-	return render_template('index.html')
+    return render_template('index.html')
 
 @app.route("/team")
 def list_team():
-	cur = g.db.execute('select * from team order by id asc')
-	teams = [dict(id=row[0], username=row[1], firstname=row[2], lastname=row[3], avatar=row[4], role=row[5]) for row in cur.fetchall()]
-	return render_template('team/list.html', teams=teams)
+    teams = Team.query.all()
+    return render_template('team/list.html', teams=teams)
 
 @app.route("/team/add", methods=['POST'])
 def add_team():
-	g.db.execute('insert into team (username, firstname, lastname, role) values (?, ?, ?, ?)', 
-			[request.form['username'], request.form['firstname'], request.form['lastname'], request.form['role']])
-	g.db.commit()
-	return redirect(url_for('list_team'))
+    username = request.form['username']
+    email = request.form['email']
+    firstname = request.form['firstname']
+    lastname = request.form['lastname']
+    role = request.form['role']
+    if username and email and firstname and lastname and role:
+        team = Team(username, email, firstname, lastname, role)
+        db.session.add(team)
+        db.session.commit()
+    return redirect(url_for('list_team'))
 
 @app.errorhandler(404)
 def not_found(error):
-	response = make_response(render_template('error.html'), 404)
-	return response
+    response = make_response(render_template('error.html'), 404)
+    return response
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', port=9001, debug=True)
-
+    app.run(host='0.0.0.0', port=9001, debug=True)
