@@ -10,8 +10,8 @@ pip install Flask
 ```
 - Open Python prompt shell inside repo directory and then execute:
 ```python
-from app import init_db
-init_db()
+from app import db
+db.create_all()
 ```
 - Start the built-in web server
 ```bash
